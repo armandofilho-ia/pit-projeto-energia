@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENERGIA - Sistema Inteligente de Monitoramento e Análise do Consumo de Energia Elétrica</title>
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Biblioteca de Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #888888;
+            --primary: #2563eb;
+            --accent: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 800;
+            color: var(--primary);
+            text-align: left;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            background-color: #d1fae5;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .card-header i {
+            font-size: 1.2em;
+            color: var(--primary);
+        }
+
+        .card-value {
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .card-value span {
+            font-size: 0.5em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer {
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-bolt"></i> ENERGIA - Sistema Inteligente de Monitoramento e Análise do Consumo de Energia Elétrica</h1>
+        <div class="status-badge" id="status-badge">
+            <div class="status-dot"></div>
+            Recebendo Dados
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                Tensão <i class="fa-solid fa-plug"></i>
+            </div>
+            <div class="card-value" id="voltage">-- <span>V</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Corrente <i class="fa-solid fa-wave-square"></i>
+            </div>
+            <div class="card-value" id="current">-- <span>A</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Potência <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="card-value" id="power">-- <span>W</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Energia Acumulada <i class="fa-solid fa-battery-half"></i>
+            </div>
+            <div class="card-value" id="energy">-- <span>Wh</span></div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="powerChart" height="80"></canvas>
+    </div>
+
+    <div class="footer">
+        Última atualização: <span id="time" style="font-weight: bold;">--</span> | Projeto Integrador I
+    </div>
+
+    <script>
+        const ctx = document.getElementById('powerChart').getContext('2d');
+        const powerChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Consumo de Potência (W)',
+                    data: [],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#10b981',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, suggestedMax: 3 }
+                },
+                animation: { duration: 400 }
+            }
+        });
+
+        const maxDataPoints = 15;
+
+        async function buscarDados() {
+            try {
+                const response = await fetch('http://localhost:8000/api/readings/latest');
+                const data = await response.json();
+                
+                if (data.status !== "vazio") {
+                    document.getElementById('voltage').innerHTML = `${data.voltage_v.toFixed(2)} <span>V</span>`;
+                    document.getElementById('current').innerHTML = `${data.current_a.toFixed(2)} <span>A</span>`;
+                    document.getElementById('power').innerHTML = `${data.power_w.toFixed(4)} <span>W</span>`;
+                    document.getElementById('energy').innerHTML = `${data.energy_wh.toFixed(4)} <span>Wh</span>`;
+                    
+                    let horaLeitura = data.timestamp.split(" ")[1];
+                    document.getElementById('time').innerText = data.timestamp;
+
+                    if(powerChart.data.labels.length > 0 && powerChart.data.labels[powerChart.data.labels.length-1] === horaLeitura) {
+                        return; 
+                    }
+
+                    powerChart.data.labels.push(horaLeitura);
+                    powerChart.data.datasets[0].data.push(data.power_w);
+
+                    if (powerChart.data.labels.length > maxDataPoints) {
+                        powerChart.data.labels.shift();
+                        powerChart.data.datasets[0].data.shift();
+                    }
+                    powerChart.update();
+                }
+            } catch (error) {
+                console.error("Erro na comunicação:", error);
+            }
+        }
+
+        setInterval(buscarDados, 3000); 
+        buscarDados();
+    </script>
+</body>
+</html>
