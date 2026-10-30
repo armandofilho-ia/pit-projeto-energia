@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENERGIA - Mobile App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #cbd5e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .smartphone {
+            width: 375px;
+            height: 812px;
+            background-color: var(--bg-color);
+            border: 12px solid #0f172a;
+            border-radius: 45px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            animation: fadeIn 0.2s ease;
+            padding-bottom: 80px; /* Espaço pro menu */
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .view.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pad-20 { padding: 20px; }
+        
+        .logo-container { text-align: center; margin-top: 60px; margin-bottom: 40px; }
+        .logo-container i { font-size: 3em; color: var(--primary); margin-bottom: 10px; }
+        .logo-container h1 { margin: 0; font-weight: 800; color: var(--text-main); font-size: 1.8em; letter-spacing: -0.5px; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.85em; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        .input-group input {
+            width: 100%; padding: 12px 15px; border: 1px solid var(--border);
+            border-radius: 10px; font-size: 1em; box-sizing: border-box;
+            background-color: var(--card-bg); transition: border-color 0.2s;
+        }
+        .input-group input:focus { outline: none; border-color: var(--primary); }
+
+        .btn {
+            width: 100%; padding: 14px; background-color: var(--primary); color: white;
+            border: none; border-radius: 10px; font-size: 1em; font-weight: 600;
+            cursor: pointer; margin-top: 10px; transition: background 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+
+        .text-center { text-align: center; margin-top: 20px; }
+        .text-link { color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        .dash-header {
+            background-color: var(--primary); color: white;
+            padding: 40px 20px 20px 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+        }
+        .user-greeting { font-size: 0.9em; opacity: 0.9; }
+        .user-name { font-size: 1.4em; font-weight: 800; margin-top: 5px; display: flex; justify-content: space-between; align-items: center; }
+
+        .whatsapp-badge {
+            background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px;
+            font-size: 0.6em; display: flex; align-items: center; gap: 5px; cursor: pointer;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .card-mini { background: var(--card-bg); padding: 15px; border-radius: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-mini i { color: var(--primary); margin-bottom: 8px; font-size: 1.2em; }
+        .card-mini .label { font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .card-mini .value { font-size: 1.4em; font-weight: 800; color: var(--text-main); margin-top: 5px; }
+        .card-mini .value span { font-size: 0.6em; color: var(--text-muted); }
+
+        .chart-wrapper { background: var(--card-bg); padding: 15px; border-radius: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .chart-header { font-size: 0.85em; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; display: flex; justify-content: space-between; }
+
+        .alert-card { background: #dcfce7; border: 1px solid #bbf7d0; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px;}
+        .alert-card i { color: #166534; font-size: 1.5em; }
+        .alert-info h4 { margin: 0; color: #166534; font-size: 0.9em; }
+        .alert-info p { margin: 3px 0 0 0; color: #15803d; font-size: 0.75em; }
+        
+        .alert-card.danger { background: #fee2e2; border-color: #fecaca; }
+        .alert-card.danger i { color: #b91c1c; }
+        .alert-card.danger h4, .alert-card.danger p { color: #b91c1c; }
+
+        .bottom-nav {
+            position: absolute; bottom: 0; width: 100%; background: var(--card-bg);
+            display: none; justify-content: space-around; padding: 15px 0 20px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid var(--border);
+            z-index: 10;
+        }
+        .nav-item {
+            color: var(--text-muted); display: flex; flex-direction: column;
+            align-items: center; font-size: 0.7em; gap: 5px; cursor: pointer; transition: color 0.2s;
+        }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .nav-item i { font-size: 1.5em; }
+
+        .header-title { font-size: 1.5em; font-weight: 800; margin: 20px 0; color: var(--text-main); }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="smartphone">
+
+        <!-- TELA 1: LOGIN -->
+        <div id="view-login" class="view pad-20 active">
+            <div class="logo-container">
+                <i class="fa-solid fa-bolt"></i>
+                <h1>ENERGIA</h1>
+                <p style="color: var(--text-muted); font-size: 0.9em;">Controle Inteligente</p>
+            </div>
+            <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="navegar('view-dashboard', 0)">Entrar</button>
+            <div class="text-center">
+                <span style="color: var(--text-muted); font-size: 0.9em;">Novo por aqui? 
+                    <span class="text-link" onclick="navegar('view-register')">Vincular Sensor</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- TELA 2: CADASTRO -->
+        <div id="view-register" class="view pad-20">
+            <div style="margin-top: 30px; margin-bottom: 20px;">
+                <h2 style="margin:0; color: var(--text-main);">Criar Conta</h2>
+                <p style="margin:5px 0 0 0; color: var(--text-muted); font-size: 0.85em;">Configure seu dispositivo IoT e alertas.</p>
+            </div>
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" placeholder="Ex: Armando Alves">
+            </div>
+            <div class="input-group">
+                <label>ID do Sensor (MAC Address)</label>
+                <input type="text" placeholder="Ex: A1:B2:C3:D4:E5">
+            </div>
+            <div class="input-group">
+                <label>WhatsApp (Para Alertas)</label>
+                <input type="tel" placeholder="(86) 99833-4918">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" placeholder="Crie uma senha">
+            </div>
+            <button class="btn" onclick="navegar('view-dashboard', 0)" style="background-color: var(--accent);">Finalizar Cadastro</button>
+            <div class="text-center">
+                <span class="text-link" style="font-size: 0.9em;" onclick="navegar('view-login')"><i class="fa-solid fa-arrow-left"></i> Voltar ao Login</span>
+            </div>
+        </div>
+
+        <!-- TELA 3: INÍCIO (DASHBOARD) -->
+        <div id="view-dashboard" class="view">
+            <div class="dash-header">
+                <div class="user-greeting">Olá, Armando</div>
+                <div class="user-name">
+                    Minha Residência
+                    <div class="whatsapp-badge" onclick="navegar('view-alertas', 2)"><i class="fa-brands fa-whatsapp"></i> Alertas ON</div>
+                </div>
+            </div>
+            <div class="pad-20">
+                <div class="grid-2">
+                    <div class="card-mini">
+                        <i class="fa-solid fa-plug"></i>
+                        <div class="label">Tensão</div>
+                        <div class="value" id="mob-voltage">220.5<span>V</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-wave-square"></i>
+                        <div class="label">Corrente</div>
+                        <div class="value" id="mob-current">0.45<span>A</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div class="label">Potência</div>
+                        <div class="value" id="mob-power">99.2<span>W</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-battery-half"></i>
+                        <div class="label">Consumo</div>
+                        <div class="value">12.4<span>kWh</span></div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <span>Curva de Potência (W)</span>
+                        <span style="color: var(--accent);"><i class="fa-solid fa-circle-dot fa-beat"></i> Ao vivo</span>
+                    </div>
+                    <canvas id="mobPowerChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 4: HISTÓRICO -->
+        <div id="view-historico" class="view pad-20">
+            <h2 class="header-title">Histórico Mensal</h2>
+            <div class="card-mini" style="margin-bottom: 15px;">
+                <div class="label">Estimativa Fatura (Outubro)</div>
+                <div class="value" style="color: var(--danger);">R$ 145,50</div>
+            </div>
+            <div class="chart-wrapper">
+                <div class="chart-header">Consumo Diário (kWh)</div>
+                <canvas id="historyChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- TELA 5: ALERTAS -->
+        <div id="view-alertas" class="view pad-20">
+            <h2 class="header-title">Central de Alertas</h2>
+            <div class="alert-card">
+                <i class="fa-solid fa-shield-check"></i>
+                <div class="alert-info">
+                    <h4>Monitoramento Ativo via WhatsApp</h4>
+                    <p>Enviando alertas para (86) 99833-4918</p>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h4 style="color: var(--text-muted); margin-bottom: 10px;">Últimos Eventos</h4>
+                <div class="alert-card danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div class="alert-info">
+                        <h4>Pico de Tensão Registrado</h4>
+                        <p>245V detectados às 14:32. Mensagem enviada.</p>
+                    </div>
+                </div>
+                <div class="alert-card" style="background: var(--card-bg); border-color: var(--border);">
+                    <i class="fa-solid fa-bolt" style="color: var(--text-muted);"></i>
+                    <div class="alert-info">
+                        <h4 style="color: var(--text-main);">Normalização</h4>
+                        <p style="color: var(--text-muted);">Tensão estabilizada em 220V às 14:35.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 6: AJUSTES -->
+        <div id="view-ajustes" class="view pad-20">
+            <h2 class="header-title">Configurações</h2>
+            <div class="input-group">
+                <label>ID do Sensor</label>
+                <input type="text" value="A1:B2:C3:D4:E5" disabled>
+            </div>
+            <div class="input-group">
+                <label>Limite de Tensão (Alerta WhatsApp)</label>
+                <input type="number" value="240">
+            </div>
+            <div class="input-group">
+                <label>Limite de Corrente (A)</label>
+                <input type="number" value="10">
+            </div>
+            <button class="btn" onclick="navegar('view-login')" style="background-color: var(--danger); margin-top: 30px;">Sair do Aplicativo</button>
+        </div>
+
+        <!-- MENU INFERIOR (VISÍVEL APENAS NAS TELAS LOGADAS) -->
+        <div id="bottom-menu" class="bottom-nav">
+            <div class="nav-item" onclick="navegar('view-dashboard', 0)">
+                <i class="fa-solid fa-house"></i><span>Início</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-historico', 1)">
+                <i class="fa-solid fa-chart-pie"></i><span>Histórico</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-alertas', 2)">
+                <i class="fa-regular fa-bell"></i><span>Alertas</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-ajustes', 3)">
+                <i class="fa-solid fa-gear"></i><span>Ajustes</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Lógica de Navegação e Menu Inferior
+        function navegar(telaId, indexMenu = -1) {
+            // Oculta todas as telas e exibe a solicitada
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(telaId).classList.add('active');
+            
+            const menu = document.getElementById('bottom-menu');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Verifica se a tela pertence às áreas logadas para mostrar o menu
+            if (['view-dashboard', 'view-historico', 'view-alertas', 'view-ajustes'].includes(telaId)) {
+                menu.style.display = 'flex';
+                // Atualiza a cor do ícone selecionado
+                if(indexMenu >= 0) {
+                    navItems.forEach(el => el.classList.remove('active'));
+                    navItems[indexMenu].classList.add('active');
+                }
+            } else {
+                menu.style.display = 'none'; // Esconde menu no Login/Cadastro
+            }
+        }
+
+        // Gráfico do Dashboard (Ao Vivo)
+        const ctxDash = document.getElementById('mobPowerChart').getContext('2d');
+        const mobPowerChart = new Chart(ctxDash, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '10:01', '10:02', '10:03', '10:04', '10:05'],
+                datasets: [{
+                    label: 'Potência', data: [85, 90, 88, 95, 99, 92],
+                    borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } }, y: { border: { display: false } } }
+            }
+        });
+
+        // Gráfico Estático da Tela Histórico
+        const ctxHist = document.getElementById('historyChart').getContext('2d');
+        new Chart(ctxHist, {
+            type: 'bar',
+            data: {
+                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                datasets: [{
+                    label: 'kWh', data: [4.2, 3.8, 4.5, 4.0, 5.1, 6.2, 5.8],
+                    backgroundColor: '#10b981', borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } } }
+            }
+        });
+
+        // Simulação do sensor (Ao Vivo)
+        setInterval(() => {
+            const newVal = 85 + Math.random() * 20;
+            mobPowerChart.data.labels.push('');
+            mobPowerChart.data.datasets[0].data.push(newVal);
+            if(mobPowerChart.data.labels.length > 10) {
+                mobPowerChart.data.labels.shift();
+                mobPowerChart.data.datasets[0].data.shift();
+            }
+            mobPowerChart.update();
+
+            if(document.getElementById('view-dashboard').classList.contains('active')){
+                document.getElementById('mob-voltage').innerHTML = `${(219 + Math.random() * 2).toFixed(1)}<span>V</span>`;
+                document.getElementById('mob-current').innerHTML = `${(0.40 + Math.random() * 0.1).toFixed(2)}<span>A</span>`;
+                document.getElementById('mob-power').innerHTML = `${newVal.toFixed(1)}<span>W</span>`;
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
