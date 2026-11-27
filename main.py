@@ -2,9 +2,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
 import sqlite3
+from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Caminho fixo ao lado do main.py: assim o banco é o mesmo, seja qual for a pasta onde o uvicorn é iniciado
+CAMINHO_BANCO = Path(__file__).parent / "medicoes.db"
 
 # Permite que o painel web (HTML) acesse a API sem bloqueios do navegador
 app.add_middleware(
@@ -16,7 +20,7 @@ app.add_middleware(
 
 # Inicializa o banco de dados SQLite
 def init_db():
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS leituras (
@@ -44,7 +48,7 @@ class Leitura(BaseModel):
 
 @app.post("/api/readings")
 def receber_leitura(leitura: Leitura):
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     cursor = conn.cursor()
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -59,7 +63,7 @@ def receber_leitura(leitura: Leitura):
 
 @app.get("/api/readings/latest")
 def obter_ultima_leitura():
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM leituras ORDER BY id DESC LIMIT 1')
