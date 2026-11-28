@@ -1,0 +1,10 @@
+# API
+fastapi==0.165.0
+uvicorn==0.54.0
+
+# Simulador do ESP32
+requests==2.34.2
+
+# Testes: o TestClient do FastAPI pede o httpx2 (com o httpx antigo aparece aviso de depreciação)
+pytest==9.2.0
+httpx2==2.16.2

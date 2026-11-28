@@ -20,10 +20,13 @@ O sistema simula a coleta de parâmetros elétricos de um dispositivo IoT (ESP32
 
 **1. Clone o repositório e configure o ambiente**
 ```bash
-git clone [https://github.com/seu-usuario/pit-projeto-energia.git](https://github.com/seu-usuario/pit-projeto-energia.git)
+git clone https://github.com/armandofilho-ia/pit-projeto-energia.git
 cd pit-projeto-energia
 python -m venv venv
+# No Linux/WSL/macOS:
+source venv/bin/activate
 # No Windows:
 venv\Scripts\activate
 # Instale as dependências:
-pip install fastapi uvicorn requests
+pip install -r requirements.txt
+```
