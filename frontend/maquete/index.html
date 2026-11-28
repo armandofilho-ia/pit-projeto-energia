@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENERGIA - Mobile App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.2"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="smartphone">
+
+        <!-- TELA 1: LOGIN -->
+        <div id="view-login" class="view pad-20 active">
+            <div class="logo-container">
+                <i class="fa-solid fa-bolt"></i>
+                <h1>ENERGIA</h1>
+                <p style="color: var(--text-muted); font-size: 0.9em;">Controle Inteligente</p>
+            </div>
+            <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="navegar('view-dashboard', 0)">Entrar</button>
+            <div class="text-center">
+                <span style="color: var(--text-muted); font-size: 0.9em;">Novo por aqui? 
+                    <span class="text-link" onclick="navegar('view-register')">Vincular Sensor</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- TELA 2: CADASTRO -->
+        <div id="view-register" class="view pad-20">
+            <div style="margin-top: 30px; margin-bottom: 20px;">
+                <h2 style="margin:0; color: var(--text-main);">Criar Conta</h2>
+                <p style="margin:5px 0 0 0; color: var(--text-muted); font-size: 0.85em;">Configure seu dispositivo IoT e alertas.</p>
+            </div>
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" placeholder="Ex: Maria Silva">
+            </div>
+            <div class="input-group">
+                <label>ID do Sensor (MAC Address)</label>
+                <input type="text" placeholder="Ex: A1:B2:C3:D4:E5">
+            </div>
+            <div class="input-group">
+                <label>WhatsApp (Para Alertas)</label>
+                <input type="tel" placeholder="(xx) xxxxx-xxxx">
+            </div>
+            <div class="input-group">
+                <label>Senha</label>
+                <input type="password" placeholder="Crie uma senha">
+            </div>
+            <button class="btn" onclick="navegar('view-dashboard', 0)" style="background-color: var(--accent);">Finalizar Cadastro</button>
+            <div class="text-center">
+                <span class="text-link" style="font-size: 0.9em;" onclick="navegar('view-login')"><i class="fa-solid fa-arrow-left"></i> Voltar ao Login</span>
+            </div>
+        </div>
+
+        <!-- TELA 3: INÍCIO (DASHBOARD) -->
+        <div id="view-dashboard" class="view">
+            <div class="dash-header">
+                <div class="user-greeting">Olá, Maria</div>
+                <div class="user-name">
+                    Minha Residência
+                    <div class="whatsapp-badge" onclick="navegar('view-alertas', 2)"><i class="fa-brands fa-whatsapp"></i> Alertas ON</div>
+                </div>
+            </div>
+            <div class="pad-20">
+                <div class="grid-2">
+                    <div class="card-mini">
+                        <i class="fa-solid fa-plug"></i>
+                        <div class="label">Tensão</div>
+                        <div class="value" id="mob-voltage">220.5<span>V</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-wave-square"></i>
+                        <div class="label">Corrente</div>
+                        <div class="value" id="mob-current">0.45<span>A</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div class="label">Potência</div>
+                        <div class="value" id="mob-power">99.2<span>W</span></div>
+                    </div>
+                    <div class="card-mini">
+                        <i class="fa-solid fa-battery-half"></i>
+                        <div class="label">Consumo</div>
+                        <div class="value">12.4<span>kWh</span></div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="chart-header">
+                        <span>Curva de Potência (W)</span>
+                        <span style="color: var(--accent);"><i class="fa-solid fa-circle-dot fa-beat"></i> Ao vivo</span>
+                    </div>
+                    <canvas id="mobPowerChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 4: HISTÓRICO -->
+        <div id="view-historico" class="view pad-20">
+            <h2 class="header-title">Histórico Mensal</h2>
+            <div class="card-mini" style="margin-bottom: 15px;">
+                <div class="label">Estimativa Fatura (Outubro)</div>
+                <div class="value" style="color: var(--danger);">R$ 145,50</div>
+            </div>
+            <div class="chart-wrapper">
+                <div class="chart-header">Consumo Diário (kWh)</div>
+                <canvas id="historyChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- TELA 5: ALERTAS -->
+        <div id="view-alertas" class="view pad-20">
+            <h2 class="header-title">Central de Alertas</h2>
+            <div class="alert-card">
+                <i class="fa-solid fa-shield-check"></i>
+                <div class="alert-info">
+                    <h4>Monitoramento Ativo via WhatsApp</h4>
+                    <p>Enviando alertas para (xx) xxxxx-xxxx</p>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h4 style="color: var(--text-muted); margin-bottom: 10px;">Últimos Eventos</h4>
+                <div class="alert-card danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div class="alert-info">
+                        <h4>Pico de Tensão Registrado</h4>
+                        <p>245V detectados às 14:32. Mensagem enviada.</p>
+                    </div>
+                </div>
+                <div class="alert-card" style="background: var(--card-bg); border-color: var(--border);">
+                    <i class="fa-solid fa-bolt" style="color: var(--text-muted);"></i>
+                    <div class="alert-info">
+                        <h4 style="color: var(--text-main);">Normalização</h4>
+                        <p style="color: var(--text-muted);">Tensão estabilizada em 220V às 14:35.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 6: AJUSTES -->
+        <div id="view-ajustes" class="view pad-20">
+            <h2 class="header-title">Configurações</h2>
+            <div class="input-group">
+                <label>ID do Sensor</label>
+                <input type="text" value="A1:B2:C3:D4:E5" disabled>
+            </div>
+            <div class="input-group">
+                <label>Limite de Tensão (Alerta WhatsApp)</label>
+                <input type="number" value="240">
+            </div>
+            <div class="input-group">
+                <label>Limite de Corrente (A)</label>
+                <input type="number" value="10">
+            </div>
+            <button class="btn" onclick="navegar('view-login')" style="background-color: var(--danger); margin-top: 30px;">Sair do Aplicativo</button>
+        </div>
+
+        <!-- MENU INFERIOR (VISÍVEL APENAS NAS TELAS LOGADAS) -->
+        <div id="bottom-menu" class="bottom-nav">
+            <div class="nav-item" onclick="navegar('view-dashboard', 0)">
+                <i class="fa-solid fa-house"></i><span>Início</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-historico', 1)">
+                <i class="fa-solid fa-chart-pie"></i><span>Histórico</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-alertas', 2)">
+                <i class="fa-regular fa-bell"></i><span>Alertas</span>
+            </div>
+            <div class="nav-item" onclick="navegar('view-ajustes', 3)">
+                <i class="fa-solid fa-gear"></i><span>Ajustes</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
