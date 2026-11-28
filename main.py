@@ -1,5 +1,7 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from datetime import datetime
 import sqlite3
 from pathlib import Path
@@ -41,10 +43,16 @@ init_db()
 # Define o formato dos dados que o ESP32 vai enviar
 class Leitura(BaseModel):
     device_id: str
-    voltage_v: float
-    current_a: float
-    power_w: float
-    energy_wh: float
+    voltage_v: float = Field(ge=0, le=26, allow_inf_nan=False)
+    current_a: float = Field(ge=0, le=3.2, allow_inf_nan=False)
+    power_w: float = Field(allow_inf_nan=False)
+    energy_wh: float = Field(allow_inf_nan=False)
+
+@app.exception_handler(RequestValidationError)
+async def erro_de_validacao(request: Request, exc: RequestValidationError):
+    # não devolve o valor recebido: NaN não pode ser convertido para JSON
+    erros = [{"loc": e["loc"], "msg": e["msg"]} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": erros})
 
 @app.post("/api/readings")
 def receber_leitura(leitura: Leitura):
