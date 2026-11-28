@@ -1,10 +1,16 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from datetime import datetime
 import sqlite3
+from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+# Caminho fixo ao lado do main.py: assim o banco é o mesmo, seja qual for a pasta onde o uvicorn é iniciado
+CAMINHO_BANCO = Path(__file__).parent / "medicoes.db"
 
 # Permite que o painel web (HTML) acesse a API sem bloqueios do navegador
 app.add_middleware(
@@ -16,7 +22,7 @@ app.add_middleware(
 
 # Inicializa o banco de dados SQLite
 def init_db():
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS leituras (
@@ -37,14 +43,20 @@ init_db()
 # Define o formato dos dados que o ESP32 vai enviar
 class Leitura(BaseModel):
     device_id: str
-    voltage_v: float
-    current_a: float
-    power_w: float
-    energy_wh: float
+    voltage_v: float = Field(ge=0, le=26, allow_inf_nan=False)
+    current_a: float = Field(ge=0, le=3.2, allow_inf_nan=False)
+    power_w: float = Field(allow_inf_nan=False)
+    energy_wh: float = Field(allow_inf_nan=False)
+
+@app.exception_handler(RequestValidationError)
+async def erro_de_validacao(request: Request, exc: RequestValidationError):
+    # não devolve o valor recebido: NaN não pode ser convertido para JSON
+    erros = [{"loc": e["loc"], "msg": e["msg"]} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": erros})
 
 @app.post("/api/readings")
 def receber_leitura(leitura: Leitura):
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     cursor = conn.cursor()
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -59,7 +71,7 @@ def receber_leitura(leitura: Leitura):
 
 @app.get("/api/readings/latest")
 def obter_ultima_leitura():
-    conn = sqlite3.connect("medicoes.db")
+    conn = sqlite3.connect(CAMINHO_BANCO)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM leituras ORDER BY id DESC LIMIT 1')
