@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENERGIA - Sistema Inteligente de Monitoramento e Análise do Consumo de Energia Elétrica</title>
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Biblioteca de Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-bolt"></i> ENERGIA - Sistema Inteligente de Monitoramento e Análise do Consumo de Energia Elétrica</h1>
+        <div class="status-badge" id="status-badge">
+            <div class="status-dot"></div>
+            Recebendo Dados
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-header">
+                Tensão <i class="fa-solid fa-plug"></i>
+            </div>
+            <div class="card-value" id="voltage">-- <span>V</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Corrente <i class="fa-solid fa-wave-square"></i>
+            </div>
+            <div class="card-value" id="current">-- <span>A</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Potência <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="card-value" id="power">-- <span>W</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                Energia Acumulada <i class="fa-solid fa-battery-half"></i>
+            </div>
+            <div class="card-value" id="energy">-- <span>Wh</span></div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="powerChart" height="80"></canvas>
+    </div>
+
+    <div class="footer">
+        Última atualização: <span id="time" style="font-weight: bold;">--</span> | Projeto Integrador I
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
